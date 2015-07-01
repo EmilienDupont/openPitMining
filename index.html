@@ -1,0 +1,180 @@
+<html>
+  <style>
+  rect:hover {
+    opacity: .8;
+  }
+  
+  .typea {
+  fill: gold;
+  color: gold;
+  }
+
+  .typeb {
+    fill: gray;
+    color: gray;
+  }
+  
+  .typec {
+    fill: brown;
+    color: brown;
+  }
+  
+  .typed {
+    fill: silver;
+    color: silver;
+  }
+  </style>
+  <body>
+    <div id="demoarea">
+      </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script>
+
+// Create data for each layer of blocks
+var numBlocks = 18
+var blocks = [];
+for (var i = 0; i < numBlocks; i++) {
+  blocks.push(i);
+}
+
+var layer2 = 8; var layer3 = 14; 
+
+// Different types
+var types = ["typea","typeb","typec","typed"];
+
+// Type variable
+var type = "typea";
+
+var width = 700,
+    height = 500,
+    size = width/(layer2 + 2);
+
+var svg = d3.select("#demoarea").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var buttonsG = svg.append("g");
+
+var solutionG = svg.append("g");
+
+var buttons = buttonsG.selectAll("circle")
+                 .data(types)
+                 .enter()
+                 .append("circle")
+                 .on("mousedown", buttonpress);
+
+    buttons.attr("cx",  function(d,i) {
+                          return (i+.5)*size;
+                        })
+           .attr("cy", height/5)
+           .attr("r", 15)
+           .attr("class", function(d) { return d;} )
+           .attr("stroke", "black")
+           .attr("stroke-width", 2);
+
+var blockRect = svg.selectAll("rect")
+                   .data(blocks)
+                   .enter()
+                   .append("rect")
+                   .on("mousedown", mousedown);
+  
+    blockRect.attr("x", function(d) {
+              console.log(d)
+              if (d >= layer2 && d < layer3) {
+                return (d + 2 - layer2)*size;
+              }
+              else if (d >= layer3) {
+                return (d + 3 - layer3)*size;
+              }
+              else {
+                return (d+1)*size;
+              }
+              })
+              .attr("y", function(d) {
+              if (d >= layer2 && d < layer3) {
+                return 4*size;
+              }
+              else if (d >= layer3) {
+                return 5*size;
+              }
+              else {
+                return 3*size;
+              }
+              })
+              .attr("height", size)
+              .attr("width", size)
+              .attr("stroke", "black")
+              .attr("stroke-width", 1)
+              .attr("fill", "gray")
+              .attr("class", function (d) {
+                        var typeinitial;
+                        if (d === 0 || d === 6 || d == 9 || d == 11 || d == 16 || d == 17) {
+                           typeinitial = "typea";
+                        } else {
+                           typeinitial = "typeb";
+                        }
+                        console.log(d3.select(this).attr("class") + " " + typeinitial)
+                        return d3.select(this).attr("class") + " " + typeinitial;
+                    });;
+
+// sets type of clicked rectangle
+function mousedown() {
+  d3.select(this)
+    .attr("class", type);
+  console.log("in mousedown");
+}
+
+// Change the type
+function buttonpress() {
+  type = d3.select(this).attr("class")
+  console.log(type)
+}
+
+// Compute
+function compute() {
+  var solution = [0,1,2,3,4,5,6,
+                  10,11,12,13,
+                  17];
+  
+  var circleSol = solutionG.selectAll("circle")
+                           .data(solution)
+                           .enter()
+                           .append("circle")
+  
+  circleSol.attr("cx", function(d) {
+              if (d >= layer2 && d < layer3) {
+                return (d + 2 - layer2)*size;
+              }
+              else if (d >= layer3) {
+                return (d + 3 - layer3)*size;
+              }
+              else {
+                return (d+1)*size;
+              }
+              })
+              .attr("cy", function(d) {
+              if (d >= layer2 && d < layer3) {
+                return 4*size;
+              }
+              else if (d >= layer3) {
+                return 5*size;
+              }
+              else {
+                return 3*size;
+              }
+              })
+              .attr("r", 15)
+              .attr("fill", "blue");
+}
+// Background
+/*
+svg.append("rect")
+   .attr("width", width)
+   .attr("height", height)
+   .attr("stroke-width", 5)
+   .attr("stroke", "black")
+   .attr("fill", "none")
+*/
+</script>
+</body>
+</html>
