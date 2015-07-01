@@ -60,7 +60,8 @@
       <h2><a href="#model" name="model">Mathematical Model</a></h2>
 
       <p>Model description goes here.</p>
-
+      <p> Right now, we have: Mine on level 1 => 100USD  level 2 => 200USD  level 3 => 300USD
+      </p>
     </div>
     <div class="section" id="implementation">
       <h2><a href="#implementation" name="implementation">Implementation</a></h2>
@@ -68,7 +69,29 @@
         Gurobi's Python interface:
       </p>
       <pre>
-    
+      cost = []; value = []; edges = []; !!! FILL THESE OUT !!!
+        
+      m = Model()
+
+      n = len(cost) # number of blocks
+      
+      # Indicator variable for each block
+      xb = {}
+      for i in range(n):
+          xb[i] = m.addVar(vtype=GRB.BINARY, name="x%d" % i)
+      
+      m.update()
+      
+      # Set objective
+      m.setObjective(quicksum((value[i] - cost[i])*xb[i] for i in range(n)), GRB.MAXIMIZE)
+      
+      # Add constraints
+      for edge in edges:
+          u = edge[0]
+          v = edge[1]
+          m.addConstr(xb[u] <= xb[v])
+      
+      m.optimize()
       </pre>
     </div>
     <div class="section" id="demo">
@@ -101,6 +124,22 @@ var width = 700,
     height = 500,
     size = width/(layer2 + 2);
 
+// Create precedence graph
+edges = [];
+
+for (var i = 8; i < 14; i++) { // range(8,14)
+    edges.push([i,i-8]);
+    edges.push([i,i-7]);
+    edges.push([i,i-6]);
+}
+
+for (var i = 14; i < 18; i++) { // range(14,18)
+    edges.push([i,i-6])
+    edges.push([i,i-5])
+    edges.push([i,i-4])
+}
+
+// Start graphics
 var svg = d3.select("#demoarea").append("svg")
     .attr("width", width)
     .attr("height", height);
@@ -195,48 +234,79 @@ function buttonpress() {
 
 // Compute
 function compute() {
-  var solution = [0,1,2,3,4,5,6,
-                  10,11,12,13,
-                  17];
+  cost = [100, 100, 100, 100, 100, 100, 100, 100, 1000, 200, 200, 200, 200, 1000, 1000, 1000, 300, 1000];
+  value = [200, 0, 0, 0, 0, 0, 300, 0, 0, 500, 0, 200, 0, 0, 0, 0, 1000, 1200];
   
-  solutionG.selectAll("circle")
-           .remove();
+  console.log('cost',cost)
+  console.log('value',value)
+  console.log('edges',edges)
   
-  var circleSol = solutionG.selectAll("circle")
-                           .data(solution)
-                           .enter()
-                           .append("circle");
-  
-  circleSol.attr("cx", function(d) {
-              if (d >= layer2 && d < layer3) {
-                return (d + 2 - layer2)*size + size/2;
-              }
-              else if (d >= layer3) {
-                return (d + 3 - layer3)*size + size/2;
-              }
-              else {
-                return (d+1)*size + size/2;
-              }
-              })
-              .attr("cy", function(d) {
-              if (d >= layer2 && d < layer3) {
-                return 4*size + size/2;
-              }
-              else if (d >= layer3) {
-                return 5*size + size/2;
-              }
-              else {
-                return 3*size + size/2;
-              }
-              })
-              .attr("r", 15)
-              .attr("fill", "black")
-              .style("opacity", 0)
-              .transition()
-              .style("opacity", .5)
-              .duration(500)
-              .delay(function(i) { return i*100 });
+  d3.json('/resource')
+    .header('Content-Type', 'application/json')
+    .post(JSON.stringify({'cost': cost,
+                          'value': value,
+                          'edges': edges }), serverResponse);
 }
 
+function serverResponse(error, data) {
+   console.log('serverResponse');
+   console.log('data', data);
+   if (!error) {
+      if ('solution' in data) {
+          var solution = data['solution'];
+          var solTemp = [];
+          for (var i = 0; i < solution.length; i++) {
+            if (solution[i] === 1) {
+              solTemp.push(i);
+            }
+          }
+          solution = solTemp;
+          console.log('solution', solution)
+          // Need to change this into correct format
+          /*
+          var solution = [0,1,2,3,4,5,6,
+                          10,11,12,13,
+                          17]; */
+          
+          solutionG.selectAll("circle")
+                   .remove();
+          
+          var circleSol = solutionG.selectAll("circle")
+                                   .data(solution)
+                                   .enter()
+                                   .append("circle");
+          
+          circleSol.attr("cx", function(d) {
+                      if (d >= layer2 && d < layer3) {
+                        return (d + 2 - layer2)*size + size/2;
+                      }
+                      else if (d >= layer3) {
+                        return (d + 3 - layer3)*size + size/2;
+                      }
+                      else {
+                        return (d+1)*size + size/2;
+                      }
+                      })
+                      .attr("cy", function(d) {
+                      if (d >= layer2 && d < layer3) {
+                        return 4*size + size/2;
+                      }
+                      else if (d >= layer3) {
+                        return 5*size + size/2;
+                      }
+                      else {
+                        return 3*size + size/2;
+                      }
+                      })
+                      .attr("r", 15)
+                      .attr("fill", "black")
+                      .style("opacity", 0)
+                      .transition()
+                      .style("opacity", .5)
+                      .duration(500)
+                      .delay(function(i) { return i*100 });
+        }
+   }
+}
 
 </script>

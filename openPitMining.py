@@ -34,28 +34,33 @@ for i in range(14,18):
     edges.append([i,i-4])
 
 # Optimization
+def optimize(cost, value, edges):
 
-m = Model()
-
-n = len(cost) # number of blocks
-
-# Indicator variable for each block
-xb = {}
-for i in range(n):
-    xb[i] = m.addVar(vtype=GRB.BINARY, name="x%d" % i)
-
-m.update()
-
-# Set objective
-m.setObjective(quicksum((value[i] - cost[i])*xb[i] for i in range(n)), GRB.MAXIMIZE)
-
-# Add constraints
-for edge in edges:
-    u = edge[0]
-    v = edge[1]
-    m.addConstr(xb[u] <= xb[v])
-
-m.optimize()
-
-for v in m.getVars():
-    print str(v.VarName) + ":" + str(v.X)
+    m = Model()
+    
+    n = len(cost) # number of blocks
+    
+    # Indicator variable for each block
+    xb = {}
+    for i in range(n):
+        xb[i] = m.addVar(vtype=GRB.BINARY, name="x%d" % i)
+    
+    m.update()
+    
+    # Set objective
+    m.setObjective(quicksum((value[i] - cost[i])*xb[i] for i in range(n)), GRB.MAXIMIZE)
+    
+    # Add constraints
+    for edge in edges:
+        u = edge[0]
+        v = edge[1]
+        m.addConstr(xb[u] <= xb[v])
+    
+    m.optimize()
+    
+    solution = [];
+    
+    for v in m.getVars():
+        solution.append(v.x)
+    
+    return solution

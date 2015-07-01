@@ -18,12 +18,12 @@ else:
 import openPitMining
 
 def handleoptimize(jsdict):
-    if 'value' in jsdict and 'cost' in jsdict and 'edges' in jsdict:
+    if 'cost' in jsdict and 'value' in jsdict and 'edges' in jsdict:
         print 'Inside handle optimize!'
-        print jsdict['value']
         print jsdict['cost']
+        print jsdict['value']
         print jsdict['edges']
-        solution = openPitMining.optimize(jsdict['vertices'], jsdict['edges'])
+        solution = openPitMining.optimize(jsdict['cost'], jsdict['value'], jsdict['edges'])
         print 'solution', solution
         return {'solution': solution }
 
