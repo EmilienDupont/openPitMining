@@ -27,6 +27,9 @@
   <body>
     <div id="demoarea">
       </div>
+    <div>
+      <button onclick="compute()">Mine away!</button>
+    </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 <script>
 
@@ -54,8 +57,6 @@ var svg = d3.select("#demoarea").append("svg")
     .attr("height", height);
 
 var buttonsG = svg.append("g");
-
-var solutionG = svg.append("g");
 
 var buttons = buttonsG.selectAll("circle")
                  .data(types)
@@ -115,13 +116,16 @@ var blockRect = svg.selectAll("rect")
                         }
                         console.log(d3.select(this).attr("class") + " " + typeinitial)
                         return d3.select(this).attr("class") + " " + typeinitial;
-                    });;
+                    });
+
+var solutionG = svg.append("g");
 
 // sets type of clicked rectangle
 function mousedown() {
+  solutionG.selectAll("circle")
+           .remove();
   d3.select(this)
     .attr("class", type);
-  console.log("in mousedown");
 }
 
 // Change the type
@@ -136,31 +140,34 @@ function compute() {
                   10,11,12,13,
                   17];
   
+  solutionG.selectAll("circle")
+           .remove();
+  
   var circleSol = solutionG.selectAll("circle")
                            .data(solution)
                            .enter()
-                           .append("circle")
+                           .append("circle");
   
   circleSol.attr("cx", function(d) {
               if (d >= layer2 && d < layer3) {
-                return (d + 2 - layer2)*size;
+                return (d + 2 - layer2)*size + size/2;
               }
               else if (d >= layer3) {
-                return (d + 3 - layer3)*size;
+                return (d + 3 - layer3)*size + size/2;
               }
               else {
-                return (d+1)*size;
+                return (d+1)*size + size/2;
               }
               })
               .attr("cy", function(d) {
               if (d >= layer2 && d < layer3) {
-                return 4*size;
+                return 4*size + size/2;
               }
               else if (d >= layer3) {
-                return 5*size;
+                return 5*size + size/2;
               }
               else {
-                return 3*size;
+                return 3*size + size/2;
               }
               })
               .attr("r", 15)
