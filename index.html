@@ -1,5 +1,18 @@
-<html>
-  <style>
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script>
+  MathJax.Hub.Config({
+                      tex2jax: {inlineMath: [['$', '$'], ['\\(','\\)']]},
+                      TeX: { equationNumbers: {autoNumber: "AMS"} },
+                      "HTML-CSS": { showMathMenu: false,
+                                    scale: 90 }
+
+                     });
+</script>
+<style>
+
   rect:hover {
     opacity: .8;
   }
@@ -23,15 +36,51 @@
     fill: silver;
     color: silver;
   }
-  </style>
-  <body>
-    <div id="demoarea">
+
+</style>
+<body>
+  <ul id="nav">
+    <li class="current"><a href="#intro">Intro</a></li>
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#model">Model</a></li>
+    <li><a href="#implementation">Implementation</a></li>
+    <li><a href="#demo">Live Demo</a></li>
+  </ul>
+  <div id="container">
+    <div class="section" id="intro">
+      <h1>Open Pit Mining</h1>
+        <subtitle>with integer programming and Gurobi</subtitle>
+    </div>
+
+    <div class="section" id="problem">
+      <h2><a href="#problem" name="problem">Problem Description</a></h2>
+      Problem description goes here
+    </div>
+    <div class="section" id="model">
+      <h2><a href="#model" name="model">Mathematical Model</a></h2>
+
+      <p>Model description goes here.</p>
+
+    </div>
+    <div class="section" id="implementation">
+      <h2><a href="#implementation" name="implementation">Implementation</a></h2>
+      <p>Below is the full implementation of the model (and the associated data) in
+        Gurobi's Python interface:
+      </p>
+      <pre>
+    
+      </pre>
+    </div>
+    <div class="section" id="demo">
+      <h2><a href="#demo" name="demo">Live Demo</a></h2>
+      <div id="demoarea">
       </div>
-    <div>
       <button onclick="compute()">Mine away!</button>
     </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 <script>
+
 
 // Create data for each layer of blocks
 var numBlocks = 18
@@ -63,7 +112,7 @@ var backgroundG = svg.append("g")
                                  .attr("stroke", "black")
                                  .attr("stroke-width", 3);
     backgroundG.append("polygon").attr("points", "0,210, 0,0, 700,0, 700,210")
-                                 .attr("fill", "cyan");
+                                 .attr("fill", "rgb(6,214,255)");
     backgroundG.append("circle").attr("cx", width - 100).attr("cy", 100).attr("r", 50).attr("fill", "yellow")
                                 .attr("stroke", "orange").attr("stroke-width", 5);
     
@@ -76,9 +125,9 @@ var buttons = buttonsG.selectAll("circle")
                  .on("mousedown", buttonpress);
 
     buttons.attr("cx",  function(d,i) {
-                          return (i+.5)*size;
+                          return (i+.5)*size/2;
                         })
-           .attr("cy", height/5)
+           .attr("cy", 20)
            .attr("r", 15)
            .attr("class", function(d) { return d;} )
            .attr("stroke", "black")
@@ -189,6 +238,5 @@ function compute() {
               .delay(function(i) { return i*100 });
 }
 
+
 </script>
-</body>
-</html>
