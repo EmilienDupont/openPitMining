@@ -139,6 +139,22 @@ for (var i = 14; i < 18; i++) { // range(14,18)
     edges.push([i,i-4])
 }
 
+// Create cost and value data
+cost = [];
+value = [];
+for (var i = 0; i < numBlocks; i++) {
+  if (i >= layer2 && i < layer3) {
+    cost.push(200);
+  }
+  else if (i >= layer3) {
+    cost.push(300);
+  }
+  else {
+    cost.push(100);
+  }
+  value.push(0);
+}
+
 // Start graphics
 var svg = d3.select("#demoarea").append("svg")
     .attr("width", width)
@@ -212,16 +228,18 @@ var blockRect = svg.selectAll("rect")
                         } else {
                            typeinitial = "typea";
                         }
-                        console.log(d3.select(this).attr("class") + " " + typeinitial)
-                        return d3.select(this).attr("class") + " " + typeinitial;
+                        console.log(typeinitial)
+                        return typeinitial;
                     });
 
 var solutionG = svg.append("g");
 
 // sets type of clicked rectangle
 function mousedown() {
+  // Remove circles from previous solution
   solutionG.selectAll("circle")
            .remove();
+
   d3.select(this)
     .attr("class", type);
 }
@@ -234,8 +252,24 @@ function buttonpress() {
 
 // Compute
 function compute() {
-  cost = [100, 100, 100, 100, 100, 100, 100, 100, 1000, 200, 200, 200, 200, 1000, 1000, 1000, 300, 1000];
-  value = [200, 0, 0, 0, 0, 0, 300, 0, 0, 500, 0, 200, 0, 0, 0, 0, 1000, 1200];
+  //cost = [100, 100, 100, 100, 100, 100, 100, 100, 1000, 200, 200, 200, 200, 1000, 1000, 1000, 300, 1000];
+  //value = [200, 0, 0, 0, 0, 0, 300, 0, 0, 500, 0, 200, 0, 0, 0, 0, 1000, 1200];
+  d3.selectAll("rect").attr("class", function(d) {
+                                      var tempType = d3.select(this).attr("class");
+                                      if (tempType === "typea") {
+                                        value[d] = 0;
+                                      }
+                                      if (tempType === "typeb") {
+                                        value[d] = 400;
+                                      }
+                                      if (tempType === "typec") {
+                                        value[d] = 250;
+                                      }
+                                      if (tempType === "typed") {
+                                        value[d] = 150;
+                                      }
+                                      return d3.select(this).attr("class");
+                                    });
   
   console.log('cost',cost)
   console.log('value',value)
@@ -253,6 +287,7 @@ function serverResponse(error, data) {
    console.log('data', data);
    if (!error) {
       if ('solution' in data) {
+          // Import solution and put it into correct format
           var solution = data['solution'];
           var solTemp = [];
           for (var i = 0; i < solution.length; i++) {
@@ -262,11 +297,6 @@ function serverResponse(error, data) {
           }
           solution = solTemp;
           console.log('solution', solution)
-          // Need to change this into correct format
-          /*
-          var solution = [0,1,2,3,4,5,6,
-                          10,11,12,13,
-                          17]; */
           
           solutionG.selectAll("circle")
                    .remove();
