@@ -5,15 +5,15 @@
   }
   
   .typea {
-  fill: gold;
-  color: gold;
-  }
-
-  .typeb {
     fill: gray;
     color: gray;
   }
   
+  .typeb {
+  fill: gold;
+  color: gold;
+  }
+
   .typec {
     fill: brown;
     color: brown;
@@ -106,13 +106,12 @@ var blockRect = svg.selectAll("rect")
               .attr("width", size)
               .attr("stroke", "black")
               .attr("stroke-width", 1)
-              .attr("fill", "gray")
               .attr("class", function (d) {
                         var typeinitial;
                         if (d === 0 || d === 6 || d == 9 || d == 11 || d == 16 || d == 17) {
-                           typeinitial = "typea";
-                        } else {
                            typeinitial = "typeb";
+                        } else {
+                           typeinitial = "typea";
                         }
                         console.log(d3.select(this).attr("class") + " " + typeinitial)
                         return d3.select(this).attr("class") + " " + typeinitial;
@@ -171,7 +170,12 @@ function compute() {
               }
               })
               .attr("r", 15)
-              .attr("fill", "blue");
+              .attr("fill", "black")
+              .style("opacity", 0)
+              .transition()
+              .style("opacity", .5)
+              .duration(500)
+              .delay(function(i) { return i*100 });
 }
 // Background
 /*
