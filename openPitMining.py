@@ -11,8 +11,8 @@ for i in range(18):
     else:
       cost.append(300)
 
-cost[8] += 1000; cost[13] += 1000; cost[14] += 1000;
-cost[15] += 1000; cost[17] += 1000;
+cost[8] = 1000; cost[13] = 1000; cost[14] = 1000;
+cost[15] = 1000; cost[17] = 1000;
 
 value = [];
 for i in range(18):
@@ -29,9 +29,9 @@ for i in range(8,14):
     edges.append([i,i-6])
 
 for i in range(14,18):
-    edges.append([i,i-14])
-    edges.append([i,i-13])
-    edges.append([i,i-12])
+    edges.append([i,i-6])
+    edges.append([i,i-5])
+    edges.append([i,i-4])
 
 # Optimization
 
@@ -58,4 +58,4 @@ for edge in edges:
 m.optimize()
 
 for v in m.getVars():
-        print v.x
+    print str(v.VarName) + ":" + str(v.X)
