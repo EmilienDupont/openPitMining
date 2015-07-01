@@ -56,6 +56,17 @@ var svg = d3.select("#demoarea").append("svg")
     .attr("width", width)
     .attr("height", height);
 
+// Create background
+var backgroundG = svg.append("g")
+    backgroundG.append("polygon").attr("points", "0,210, 0,500, 700,500, 700,210")
+                                 .attr("fill", "rgb(50,50,50)")
+                                 .attr("stroke", "black")
+                                 .attr("stroke-width", 3);
+    backgroundG.append("polygon").attr("points", "0,210, 0,0, 700,0, 700,210")
+                                 .attr("fill", "cyan");
+    backgroundG.append("circle").attr("cx", width - 100).attr("cy", 100).attr("r", 50).attr("fill", "yellow")
+                                .attr("stroke", "orange").attr("stroke-width", 5);
+    
 var buttonsG = svg.append("g");
 
 var buttons = buttonsG.selectAll("circle")
