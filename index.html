@@ -188,7 +188,9 @@ var buttons = buttonsG.selectAll("circle")
            .attr("stroke", "black")
            .attr("stroke-width", 2);
 
-var blockRect = svg.selectAll("rect")
+var blocksG = svg.append("g");
+
+var blockRect = blocksG.selectAll("rect")
                    .data(blocks)
                    .enter()
                    .append("rect")
@@ -234,10 +236,13 @@ var blockRect = svg.selectAll("rect")
 
 var solutionG = svg.append("g");
 
+var solutionRect = solutionG.selectAll("rect")
+                  .on("mousedown", removeSol);
+
 // sets type of clicked rectangle
 function mousedown() {
-  // Remove circles from previous solution
-  solutionG.selectAll("circle")
+  // Remove rectangles from previous solution
+  solutionG.selectAll("rect")
            .remove();
 
   d3.select(this)
@@ -250,11 +255,16 @@ function buttonpress() {
   console.log(type)
 }
 
+function removeSol() {
+  solutionG.selectAll("rect")
+           .remove();
+}
+
 // Compute
 function compute() {
   //cost = [100, 100, 100, 100, 100, 100, 100, 100, 1000, 200, 200, 200, 200, 1000, 1000, 1000, 300, 1000];
   //value = [200, 0, 0, 0, 0, 0, 300, 0, 0, 500, 0, 200, 0, 0, 0, 0, 1000, 1200];
-  d3.selectAll("rect").attr("class", function(d) {
+  blocksG.selectAll("rect").attr("class", function(d) {
                                       var tempType = d3.select(this).attr("class");
                                       if (tempType === "typea") {
                                         value[d] = 0;
@@ -298,43 +308,51 @@ function serverResponse(error, data) {
           solution = solTemp;
           console.log('solution', solution)
           
-          solutionG.selectAll("circle")
+          solutionG.selectAll("rect")
                    .remove();
           
-          var circleSol = solutionG.selectAll("circle")
+          var rectSol = solutionG.selectAll("rect")
                                    .data(solution)
                                    .enter()
-                                   .append("circle");
+                                   .append("rect");
           
-          circleSol.attr("cx", function(d) {
+          rectSol.attr("x", function(d) {
+                      console.log(d)
                       if (d >= layer2 && d < layer3) {
-                        return (d + 2 - layer2)*size + size/2;
+                        return (d + 2 - layer2)*size;
                       }
                       else if (d >= layer3) {
-                        return (d + 3 - layer3)*size + size/2;
+                        return (d + 3 - layer3)*size;
                       }
                       else {
-                        return (d+1)*size + size/2;
+                        return (d+1)*size;
                       }
                       })
-                      .attr("cy", function(d) {
+                      .attr("y", function(d) {
                       if (d >= layer2 && d < layer3) {
-                        return 4*size + size/2;
+                        return 4*size;
                       }
                       else if (d >= layer3) {
-                        return 5*size + size/2;
+                        return 5*size;
                       }
                       else {
-                        return 3*size + size/2;
+                        return 3*size;
                       }
                       })
-                      .attr("r", 15)
-                      .attr("fill", "black")
+                      .attr("height", size)
+                      .attr("width", size)
+                      .attr("fill", "rgb(6,214,255)")
+                      .attr("stroke", "rgb(6,214,255)")
                       .style("opacity", 0)
+                      .style("stroke-opacity", 0)
                       .transition()
-                      .style("opacity", .5)
+                      .style("opacity", 1)
+                      .style("stroke-opacity", 1)
                       .duration(500)
                       .delay(function(i) { return i*100 });
+          
+          solutionRect = solutionG.selectAll("rect")
+                  .on("mousedown", removeSol);
         }
    }
 }
