@@ -23,8 +23,8 @@
   }
   
   .typeb {
-    fill: gold;
-    color: gold;
+    fill: silver;
+    color: silver;
   }
 
   .typec {
@@ -33,9 +33,10 @@
   }
   
   .typed {
-    fill: silver;
-    color: silver;
+    fill: gold;
+    color: gold;
   }
+
 
 </style>
 <body>
@@ -60,7 +61,7 @@
       <h2><a href="#model" name="model">Mathematical Model</a></h2>
 
       <p>Model description goes here.</p>
-      <p> Right now, we have: Mine on level 1 => 100USD  level 2 => 200USD  level 3 => 300USD
+      <p> Right now, we have: Mine on level 1 => 100USD  level 2 => 200USD  level 3 => 300USD. Each block has a 1000 tons of rock
       </p>
     </div>
     <div class="section" id="implementation">
@@ -155,6 +156,8 @@ for (var i = 0; i < numBlocks; i++) {
   value.push(0);
 }
 
+var profit = 0;
+
 // Start graphics
 var svg = d3.select("#demoarea").append("svg")
     .attr("width", width)
@@ -226,7 +229,7 @@ var blockRect = blocksG.selectAll("rect")
               .attr("class", function (d) {
                         var typeinitial;
                         if (d === 0 || d === 6 || d == 9 || d == 11 || d == 16 || d == 17) {
-                           typeinitial = "typeb";
+                           typeinitial = "typed";
                         } else {
                            typeinitial = "typea";
                         }
@@ -270,13 +273,13 @@ function compute() {
                                         value[d] = 0;
                                       }
                                       if (tempType === "typeb") {
-                                        value[d] = 400;
+                                        value[d] = 150;
                                       }
                                       if (tempType === "typec") {
                                         value[d] = 250;
                                       }
                                       if (tempType === "typed") {
-                                        value[d] = 150;
+                                        value[d] = 400;
                                       }
                                       return d3.select(this).attr("class");
                                     });
@@ -300,6 +303,14 @@ function serverResponse(error, data) {
           // Import solution and put it into correct format
           var solution = data['solution'];
           var solTemp = [];
+          profit = solution[solution.length - 1]; // Last element is profit
+          
+          console.log('test',solution)
+          
+          solution = solution.slice(0,solution.length-1);
+          
+          console.log('test',solution)
+          
           for (var i = 0; i < solution.length; i++) {
             if (solution[i] === 1) {
               solTemp.push(i);
@@ -307,6 +318,7 @@ function serverResponse(error, data) {
           }
           solution = solTemp;
           console.log('solution', solution)
+          console.log('profit', profit)
           
           solutionG.selectAll("rect")
                    .remove();
@@ -350,6 +362,20 @@ function serverResponse(error, data) {
                       .style("stroke-opacity", 1)
                       .duration(500)
                       .delay(function(i) { return i*100 });
+          
+          profit = 1000*profit;
+          
+          solutionG.selectAll("text").remove();
+          
+          solutionG.append("text")
+                    .text("Profit: " + String(profit) + "$")
+                    .attr("x", width/2)
+                    .attr("y", 20)
+                    .attr("font-family", "sans-serif")
+                    .attr("font-size", "18px")
+                    .attr("fill", "white")
+                    .attr("text-anchor", "middle");
+          
           
           solutionRect = solutionG.selectAll("rect")
                   .on("mousedown", removeSol);

@@ -63,4 +63,6 @@ def optimize(cost, value, edges):
     for v in m.getVars():
         solution.append(v.x)
     
+    solution.append(m.objVal)
+    
     return solution
