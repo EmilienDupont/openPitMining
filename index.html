@@ -13,6 +13,10 @@
 </script>
 <style>
 
+  text {
+    font-family: sans-serif
+  }
+
   rect:hover {
     opacity: .8;
   }
@@ -35,6 +39,11 @@
   .typed {
     fill: gold;
     color: gold;
+  }
+  
+  .typee {
+    fill: purple;
+    color: purple;
   }
 
 
@@ -107,19 +116,19 @@
 
 
 // Create data for each layer of blocks
-var numBlocks = 18
+var numBlocks = 28
 var blocks = [];
 for (var i = 0; i < numBlocks; i++) {
   blocks.push(i);
 }
 
-var layer2 = 8; var layer3 = 14; 
+var layer2 = 10; var layer3 = 18; var layer4 = 24; 
 
 // Different types
-var types = ["typea","typeb","typec","typed"];
+var types = ["typea","typeb","typec","typed","typee"];
 
 // Type variable
-var type = "typea";
+var type = "typeb";
 
 var width = 700,
     height = 500,
@@ -128,16 +137,22 @@ var width = 700,
 // Create precedence graph
 edges = [];
 
-for (var i = 8; i < 14; i++) { // range(8,14)
-    edges.push([i,i-8]);
-    edges.push([i,i-7]);
-    edges.push([i,i-6]);
+for (var i = layer2; i < layer3; i++) { // range(10,18)
+    edges.push([i,i-layer2]);
+    edges.push([i,i-layer2+1]);
+    edges.push([i,i-layer2+2]);
 }
 
-for (var i = 14; i < 18; i++) { // range(14,18)
-    edges.push([i,i-6])
-    edges.push([i,i-5])
-    edges.push([i,i-4])
+for (var i = layer3; i < layer4; i++) { // range(18,24)
+    edges.push([i,i-(layer3-layer2)])
+    edges.push([i,i-(layer3-layer2)+1])
+    edges.push([i,i-(layer3-layer2)+2])
+}
+
+for (var i = layer3; i < numBlocks; i++) { // range(24,28)
+    edges.push([i,i-(layer4-layer3)])
+    edges.push([i,i-(layer4-layer3)+1])
+    edges.push([i,i-(layer4-layer3)+2])
 }
 
 // Create cost and value data
@@ -147,8 +162,11 @@ for (var i = 0; i < numBlocks; i++) {
   if (i >= layer2 && i < layer3) {
     cost.push(200);
   }
-  else if (i >= layer3) {
+  else if (i >= layer3 && i < layer4) {
     cost.push(300);
+  }
+  else if (i >= layer4) {
+    cost.push(500);
   }
   else {
     cost.push(100);
@@ -165,14 +183,12 @@ var svg = d3.select("#demoarea").append("svg")
 
 // Create background
 var backgroundG = svg.append("g")
-    backgroundG.append("polygon").attr("points", "0,210, 0,500, 700,500, 700,210")
+    backgroundG.append("polygon").attr("points", "0,233.4, 0,500, 700,500, 700,233.4")
                                  .attr("fill", "rgb(50,50,50)")
                                  .attr("stroke", "black")
-                                 .attr("stroke-width", 3);
-    backgroundG.append("polygon").attr("points", "0,210, 0,0, 700,0, 700,210")
+                                 .attr("stroke-width", 1);
+    backgroundG.append("polygon").attr("points", "0,233.4, 0,0, 700,0, 700,233.4")
                                  .attr("fill", "rgb(6,214,255)");
-    backgroundG.append("circle").attr("cx", width - 100).attr("cy", 100).attr("r", 50).attr("fill", "yellow")
-                                .attr("stroke", "orange").attr("stroke-width", 5);
     
 var buttonsG = svg.append("g");
 
@@ -183,13 +199,68 @@ var buttons = buttonsG.selectAll("circle")
                  .on("mousedown", buttonpress);
 
     buttons.attr("cx",  function(d,i) {
-                          return (i+.5)*size/2;
+                          return (i+.5)*size/1.2;
                         })
            .attr("cy", 20)
            .attr("r", 15)
            .attr("class", function(d) { return d;} )
            .attr("stroke", "black")
            .attr("stroke-width", 2);
+
+var labelsG = svg.append("g");
+
+var labels = labelsG.selectAll("text")
+                    .data(types)
+                    .enter()
+                    .append("text")
+
+    labels.attr("x",  function(d,i) {
+                          return (i+.5)*size/1.2;
+                        })
+          .attr("y", 50)
+          .text(function (d) { if (d === "typea") {
+                                 return "0k$";
+                               }
+                               else if (d === "typeb") {
+                                 return "150k$";
+                               }
+                               else if (d === "typec") {
+                                 return "250k$";
+                               }
+                               else if (d === "typed") {
+                                 return "400k$";
+                               }
+                               else if (d === "typee") {
+                                 return "700k$";
+                               }
+                               else {
+                                 return " ";}
+                             });
+
+labelsG.append("text")
+       .attr("x", 30)
+       .attr("y", 4.5*size)
+       .text("100k$");
+
+labelsG.append("text")
+       .attr("x", 30 + size)
+       .attr("y", 5.5*size)
+       .text("200k$");
+
+labelsG.append("text")
+       .attr("x", 30 + 2*size)
+       .attr("y", 6.5*size)
+       .text("300k$");
+
+labelsG.append("text")
+       .attr("x", 30 + 3*size)
+       .attr("y", 7.5*size)
+       .text("500k$");
+
+labelsG.selectAll("text")
+       .attr("font-size", "14px")
+       .attr("fill", "white")
+       .attr("text-anchor", "middle");
 
 var blocksG = svg.append("g");
 
@@ -200,12 +271,14 @@ var blockRect = blocksG.selectAll("rect")
                    .on("mousedown", mousedown);
   
     blockRect.attr("x", function(d) {
-              console.log(d)
               if (d >= layer2 && d < layer3) {
                 return (d + 2 - layer2)*size;
               }
-              else if (d >= layer3) {
+              else if (d >= layer3 && d < layer4) {
                 return (d + 3 - layer3)*size;
+              }
+              else if (d >= layer4) {
+                return (d + 4 - layer4)*size;
               }
               else {
                 return (d+1)*size;
@@ -213,13 +286,16 @@ var blockRect = blocksG.selectAll("rect")
               })
               .attr("y", function(d) {
               if (d >= layer2 && d < layer3) {
-                return 4*size;
-              }
-              else if (d >= layer3) {
                 return 5*size;
               }
+              else if (d >= layer3 && d < layer4) {
+                return 6*size;
+              }
+              else if (d >= layer4) {
+                return 7*size;
+              }
               else {
-                return 3*size;
+                return 4*size;
               }
               })
               .attr("height", size)
@@ -230,7 +306,14 @@ var blockRect = blocksG.selectAll("rect")
                         var typeinitial;
                         if (d === 0 || d === 6 || d == 9 || d == 11 || d == 16 || d == 17) {
                            typeinitial = "typed";
-                        } else {
+                        }
+                        else if (d === 1 || d === 4 || d == 7 || d == 22 || d == 24) {
+                           typeinitial = "typeb";
+                        }
+                        else if (d === 18 || d === 21 || d == 26 || d == 27) {
+                           typeinitial = "typee";
+                        }
+                        else {
                            typeinitial = "typea";
                         }
                         console.log(typeinitial)
@@ -281,6 +364,9 @@ function compute() {
                                       if (tempType === "typed") {
                                         value[d] = 400;
                                       }
+                                      if (tempType === "typee") {
+                                        value[d] = 700;
+                                      }
                                       return d3.select(this).attr("class");
                                     });
   
@@ -329,12 +415,14 @@ function serverResponse(error, data) {
                                    .append("rect");
           
           rectSol.attr("x", function(d) {
-                      console.log(d)
                       if (d >= layer2 && d < layer3) {
                         return (d + 2 - layer2)*size;
                       }
-                      else if (d >= layer3) {
+                      else if (d >= layer3 && d < layer4) {
                         return (d + 3 - layer3)*size;
+                      }
+                      else if (d >= layer4) {
+                        return (d + 4 - layer4)*size;
                       }
                       else {
                         return (d+1)*size;
@@ -342,19 +430,23 @@ function serverResponse(error, data) {
                       })
                       .attr("y", function(d) {
                       if (d >= layer2 && d < layer3) {
-                        return 4*size;
-                      }
-                      else if (d >= layer3) {
                         return 5*size;
                       }
+                      else if (d >= layer3 && d < layer4) {
+                        return 6*size;
+                      }
+                      else if (d >= layer4) {
+                        return 7*size;
+                      }
                       else {
-                        return 3*size;
+                        return 4*size;
                       }
                       })
                       .attr("height", size)
                       .attr("width", size)
                       .attr("fill", "rgb(6,214,255)")
                       .attr("stroke", "rgb(6,214,255)")
+                      .attr("stroke-width", 1.8)
                       .style("opacity", 0)
                       .style("stroke-opacity", 0)
                       .transition()
@@ -363,16 +455,15 @@ function serverResponse(error, data) {
                       .duration(500)
                       .delay(function(i) { return i*100 });
           
-          profit = 1000*profit;
+          profit = profit/1000;
           
           solutionG.selectAll("text").remove();
           
           solutionG.append("text")
-                    .text("Profit: " + String(profit) + "$")
+                    .text("Profit: " + String(profit) + " million dollars")
                     .attr("x", width/2)
-                    .attr("y", 20)
-                    .attr("font-family", "sans-serif")
-                    .attr("font-size", "18px")
+                    .attr("y", 150)
+                    .attr("font-size", "22px")
                     .attr("fill", "white")
                     .attr("text-anchor", "middle");
           
