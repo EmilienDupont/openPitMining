@@ -65,13 +65,51 @@
     <div class="section" id="problem">
       <h2><a href="#problem" name="problem">Problem Description</a></h2>
       Problem description goes here
+      <p>
+        Open Pit Mining consists in extracting rocks or minerals from the ground by removing them from an open pit.
+        We will use Gurobi to compute the order in which to extract the rock to maximize profit.
+      </p>
     </div>
     <div class="section" id="model">
       <h2><a href="#model" name="model">Mathematical Model</a></h2>
 
       <p>Model description goes here.</p>
-      <p> Right now, we have: Mine on level 1 => 100USD  level 2 => 200USD  level 3 => 300USD. Each block has a 1000 tons of rock
-      </p>
+      
+      <p> We separate the ground into several blocks, each of which has a known concentration of ---rock type----. With each of these
+      blocks we associate a binary variable $x_i$ such that if $x_i = 1$ we extract the block, otherwise we don't. </p>
+      
+      <p>
+      We denote by $v_i$ the value of block $i$ which is proportional to the concentration of ---rock type----. </p>
+      
+      <p>The blocks are distributed on several levels (level 1 corresponds to the surface, level 2 to the level immediately below it etc...).
+      The deeper the blocks lie, the more costly they are to remove.
+      Therefore, we also associate a cost $c_i$ with each block, which corresponds to the cost of removing it from the earth.</p>
+      
+      <p>However, there is a constraint on the order in which the blocks can be removed. Indeed, to remove a block from the ground we must
+      also remove the block on top of it. Furthermore, due to restrictions on the slope of the mine, the blocks above and to the left and right
+      must also be removed. We can impose these constraints by drawing a precedence graph $G$. We consider the blocks to be the nodes of the graph,
+      and we draw a directed edge, from every block $i$ to the block above it, above to the left and above to the right. We then have the
+      following restriction for each edge $(i,j)$ of the precedence graph
+       \[
+        x_i \leq x_j \quad \forall (i,j) \, \in G
+      \]
+      Indeed, if $x_i = 1$ then we must have $x_j = 1$, i.e. if block $i$ is removed then so must the blocks above it. </p>
+      
+      <p> Finally, we consider the profit. For each block, the profit is given by $v_i - c_i$ i.e. the value of the rock minus the
+      cost to remove it. This quantity is of course zero if the block is not removed. So the total profit is given by
+      \[
+        \text{profit} = \sum_{i} (v_i - c_i)x_i
+      \]</p>
+      
+      <p> In summary, we wish to
+        \[
+      \begin{array}{ll}
+      \text{maximize} & \sum_{i} (v_i - c_i)x_i \\
+      \text{subject to} & x_i \leq x_j \quad \forall (i,j) \, \in G \\
+                        & x_i \in \{ 0, 1 \} \, \forall i
+      \end{array}
+      \]</p>
+      
     </div>
     <div class="section" id="implementation">
       <h2><a href="#implementation" name="implementation">Implementation</a></h2>
@@ -106,6 +144,12 @@
     </div>
     <div class="section" id="demo">
       <h2><a href="#demo" name="demo">Live Demo</a></h2>
+      <p> As an example we consider a mine where 28 blocks on 4 levels have been identified. Each block weighs a 1000 tonnes and
+      extraction costs 100USD/tonne for level 1, 200USD/tonne for level 2, 300USD/tonne for level 3 and 500USD/tonne for level 4.
+      Each color corresponds to a different concentration of ---some rock type---. 
+      </p>
+      <p> Click the Mine away! button to compute the optimal block removing order using Gurobi. Click on the blocks to change
+      the concentration of --some rock type---. You can click on the different circles to change the rock type. </p>
       <div id="demoarea">
       </div>
       <button onclick="compute()">Mine away!</button>
