@@ -20,12 +20,12 @@
   rect:hover {
     opacity: .8;
   }
-  
+
   .typea {
     fill: gray;
     color: gray;
   }
-  
+
   .typeb {
     fill: silver;
     color: silver;
@@ -35,12 +35,12 @@
     fill: brown;
     color: brown;
   }
-  
+
   .typed {
     fill: gold;
     color: gold;
   }
-  
+
   .typee {
     fill: purple;
     color: purple;
@@ -74,17 +74,17 @@
       <h2><a href="#model" name="model">Mathematical Model</a></h2>
 
       <p>Model description goes here.</p>
-      
+
       <p> We separate the ground into several blocks, each of which has a known concentration of ---rock type----. With each of these
       blocks we associate a binary variable $x_i$ such that if $x_i = 1$ we extract the block, otherwise we don't. </p>
-      
+
       <p>
       We denote by $v_i$ the value of block $i$ which is proportional to the concentration of ---rock type----. </p>
-      
+
       <p>The blocks are distributed on several levels (level 1 corresponds to the surface, level 2 to the level immediately below it etc...).
       The deeper the blocks lie, the more costly they are to remove.
       Therefore, we also associate a cost $c_i$ with each block, which corresponds to the cost of removing it from the earth.</p>
-      
+
       <p>However, there is a constraint on the order in which the blocks can be removed. Indeed, to remove a block from the ground we must
       also remove the block on top of it. Furthermore, due to restrictions on the slope of the mine, the blocks above and to the left and right
       must also be removed. We can impose these constraints by drawing a precedence graph $G$. We consider the blocks to be the nodes of the graph,
@@ -94,13 +94,13 @@
         x_i \leq x_j \quad \forall (i,j) \, \in G
       \]
       Indeed, if $x_i = 1$ then we must have $x_j = 1$, i.e. if block $i$ is removed then so must the blocks above it. </p>
-      
+
       <p> Finally, we consider the profit. For each block, the profit is given by $v_i - c_i$ i.e. the value of the rock minus the
       cost to remove it. This quantity is of course zero if the block is not removed. So the total profit is given by
       \[
         \text{profit} = \sum_{i} (v_i - c_i)x_i
       \]</p>
-      
+
       <p> In summary, we wish to
         \[
       \begin{array}{ll}
@@ -109,7 +109,7 @@
                         & x_i \in \{ 0, 1 \} \, \forall i
       \end{array}
       \]</p>
-      
+
     </div>
     <div class="section" id="implementation">
       <h2><a href="#implementation" name="implementation">Implementation</a></h2>
@@ -118,27 +118,27 @@
       </p>
       <pre>
       cost = []; value = []; edges = []; !!! FILL THESE OUT !!!
-        
+
       m = Model()
 
       n = len(cost) # number of blocks
-      
+
       # Indicator variable for each block
       xb = {}
       for i in range(n):
           xb[i] = m.addVar(vtype=GRB.BINARY, name="x%d" % i)
-      
+
       m.update()
-      
+
       # Set objective
       m.setObjective(quicksum((value[i] - cost[i])*xb[i] for i in range(n)), GRB.MAXIMIZE)
-      
+
       # Add constraints
       for edge in edges:
           u = edge[0]
           v = edge[1]
           m.addConstr(xb[u] <= xb[v])
-      
+
       m.optimize()
       </pre>
     </div>
@@ -146,7 +146,7 @@
       <h2><a href="#demo" name="demo">Live Demo</a></h2>
       <p> As an example we consider a mine where 28 blocks on 4 levels have been identified. Each block weighs a 1000 tonnes and
       extraction costs 100USD/tonne for level 1, 200USD/tonne for level 2, 300USD/tonne for level 3 and 500USD/tonne for level 4.
-      Each color corresponds to a different concentration of ---some rock type---. 
+      Each color corresponds to a different concentration of ---some rock type---.
       </p>
       <p> Click the Mine away! button to compute the optimal block removing order using Gurobi. Click on the blocks to change
       the concentration of --some rock type---. You can click on the different circles to change the rock type. </p>
@@ -166,7 +166,7 @@ for (var i = 0; i < numBlocks; i++) {
   blocks.push(i);
 }
 
-var layer2 = 10; var layer3 = 18; var layer4 = 24; 
+var layer2 = 10; var layer3 = 18; var layer4 = 24;
 
 // Different types
 var types = ["typea","typeb","typec","typed","typee"];
@@ -233,7 +233,7 @@ var backgroundG = svg.append("g")
                                  .attr("stroke-width", 1);
     backgroundG.append("polygon").attr("points", "0,233.4, 0,0, 700,0, 700,233.4")
                                  .attr("fill", "rgb(6,214,255)");
-    
+
 var buttonsG = svg.append("g");
 
 var buttons = buttonsG.selectAll("circle")
@@ -313,7 +313,7 @@ var blockRect = blocksG.selectAll("rect")
                    .enter()
                    .append("rect")
                    .on("mousedown", mousedown);
-  
+
     blockRect.attr("x", function(d) {
               if (d >= layer2 && d < layer3) {
                 return (d + 2 - layer2)*size;
@@ -413,11 +413,11 @@ function compute() {
                                       }
                                       return d3.select(this).attr("class");
                                     });
-  
+
   console.log('cost',cost)
   console.log('value',value)
   console.log('edges',edges)
-  
+
   d3.json('/resource')
     .header('Content-Type', 'application/json')
     .post(JSON.stringify({'cost': cost,
@@ -434,13 +434,13 @@ function serverResponse(error, data) {
           var solution = data['solution'];
           var solTemp = [];
           profit = solution[solution.length - 1]; // Last element is profit
-          
+
           console.log('test',solution)
-          
+
           solution = solution.slice(0,solution.length-1);
-          
+
           console.log('test',solution)
-          
+
           for (var i = 0; i < solution.length; i++) {
             if (solution[i] === 1) {
               solTemp.push(i);
@@ -449,15 +449,15 @@ function serverResponse(error, data) {
           solution = solTemp;
           console.log('solution', solution)
           console.log('profit', profit)
-          
+
           solutionG.selectAll("rect")
                    .remove();
-          
+
           var rectSol = solutionG.selectAll("rect")
                                    .data(solution)
                                    .enter()
                                    .append("rect");
-          
+
           rectSol.attr("x", function(d) {
                       if (d >= layer2 && d < layer3) {
                         return (d + 2 - layer2)*size;
@@ -498,11 +498,11 @@ function serverResponse(error, data) {
                       .style("stroke-opacity", 1)
                       .duration(500)
                       .delay(function(i) { return i*100 });
-          
+
           profit = profit/1000;
-          
+
           solutionG.selectAll("text").remove();
-          
+
           solutionG.append("text")
                     .text("Profit: " + String(profit) + " million dollars")
                     .attr("x", width/2)
@@ -510,8 +510,8 @@ function serverResponse(error, data) {
                     .attr("font-size", "22px")
                     .attr("fill", "white")
                     .attr("text-anchor", "middle");
-          
-          
+
+
           solutionRect = solutionG.selectAll("rect")
                   .on("mousedown", removeSol);
         }
