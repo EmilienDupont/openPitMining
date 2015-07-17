@@ -162,25 +162,41 @@ aside {
       <h1>Open Pit Mining</h1>
         <subtitle>with integer programming and Gurobi</subtitle>
     </div>
-
+    <p>
+      In this example we'll solve a simple mining problem: how to extract rock or minerals from an open pit while incurring the smallest cost.
+    </p>
+    <p>
+    We'll construct a mathematical model of the business problem, implement this model in Gurobi's Python interface, and compute and visualize an optimal solution.
+    </p>
     <div class="section" id="problem">
       <h2><a href="#problem" name="problem">Problem Description</a></h2>
-      Problem description goes here
       <p>
-        Open Pit Mining consists in extracting rocks or minerals from the ground by removing them from an open pit.
-        We will use Gurobi to compute the order in which to extract the rock to maximize profit.
+        Measurements of gravity, magnetism and radioactivity have determined a location to be rich in a metal ore
+        and appropriate for open pit mining. The open pit mine has been divided into several blocks and we now need to decide which blocks
+        to extract and which to leave. </p>
+      <p> (Add a picture here with a definition of open mine: "an excavation or cut made at the surface of the ground for the purpose of extracting ore
+      and which is open to the surface for the duration of the mine's life.") </p>
+      <p>
+        The concentration of ore in each of the blocks has been determined through test drilling. This concentration and the market value of the ore
+        allows us to determine the profit gained from extracting each block.
       </p>
+      <p> However, there is also a cost related to extracting the block from the ground. Usually, the deeper the rock lies the more expensive it is
+      to remove. In addition we cannot remove the rocks in an arbitrary order: to remove any block we must also remove the block above it. We also need
+      trucks to enter the mine and remove the ore, so we have restrictions on the slope of the mine: to remove a block, the blocks above and to the left
+      and above and to the right must also be removed.</p>
+      <p>
+        Given these restrictions, we will use Gurobi to compute the order in which to extract the blocks to maximize profit.
+      </p>
+      <p> References http://www.tulane.edu/~sanelson/eens1110/minresources.htm http://www.mine-engineer.com/mining/open_pit.htm</p>
     </div>
     <div class="section" id="model">
       <h2><a href="#model" name="model">Mathematical Model</a></h2>
 
-      <p>Model description goes here.</p>
-
-      <p> We separate the ground into several blocks, each of which has a known concentration of ---rock type----. With each of these
+      <p> The ground has been separated into several blocks, each of which has a known concentration of the metal ore. With each of these
       blocks we associate a binary variable $x_i$ such that if $x_i = 1$ we extract the block, otherwise we don't. </p>
 
       <p>
-      We denote by $v_i$ the value of block $i$ which is proportional to the concentration of ---rock type----. </p>
+      We denote by $v_i$ the value of block $i$ which is proportional to the concentration of the metal ore. </p>
 
       <p>The blocks are distributed on several levels (level 1 corresponds to the surface, level 2 to the level immediately below it etc...).
       The deeper the blocks lie, the more costly they are to remove.
@@ -196,8 +212,8 @@ aside {
       \]
       Indeed, if $x_i = 1$ then we must have $x_j = 1$, i.e. if block $i$ is removed then so must the blocks above it. </p>
 
-      <p> Finally, we consider the profit. For each block, the profit is given by $v_i - c_i$ i.e. the value of the rock minus the
-      cost to remove it. This quantity is of course zero if the block is not removed. So the total profit is given by
+      <p> Finally, we consider the profit. For each block, the profit is given by $v_i - c_i$ i.e. the value of the ore minus the
+      cost to remove the rock. This quantity is of course zero if the block is not removed. So the total profit is given by
       \[
         \text{profit} = \sum_{i} (v_i - c_i)x_i
       \]</p>
