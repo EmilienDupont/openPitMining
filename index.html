@@ -113,40 +113,38 @@ aside {
    border-left: 3px solid steelblue;
 }
 
+text {
+  font-family: sans-serif
+}
 
-  text {
-    font-family: sans-serif
-  }
+rect:hover {
+  opacity: .8;
+}
 
-  rect:hover {
-    opacity: .8;
-  }
+.typea {
+  fill: gray;
+  color: gray;
+}
 
-  .typea {
-    fill: gray;
-    color: gray;
-  }
+.typeb {
+  fill: silver;
+  color: silver;
+}
 
-  .typeb {
-    fill: silver;
-    color: silver;
-  }
+.typec {
+  fill: brown;
+  color: brown;
+}
 
-  .typec {
-    fill: brown;
-    color: brown;
-  }
+.typed {
+  fill: gold;
+  color: gold;
+}
 
-  .typed {
-    fill: gold;
-    color: gold;
-  }
-
-  .typee {
-    fill: purple;
-    color: purple;
-  }
-
+.typee {
+  fill: purple;
+  color: purple;
+}
 
 </style>
 <body>
@@ -171,11 +169,17 @@ aside {
     <div class="section" id="problem">
       <h2><a href="#problem" name="problem">Problem Description</a></h2>
       <p>
-        Measurements of gravity, magnetism and radioactivity have determined a location to be rich in a metal ore
+        <a href="http://www.tulane.edu/~sanelson/eens1110/minresources.htm"> Measurements of gravity, magnetism and radioactivity</a> have determined a location to be rich in a metal ore
         and appropriate for open pit mining. The open pit mine has been divided into several blocks and we now need to decide which blocks
-        to extract and which to leave. </p>
-      <p> (Add a picture here with a definition of open mine: "an excavation or cut made at the surface of the ground for the purpose of extracting ore
-      and which is open to the surface for the duration of the mine's life.") </p>
+        to extract and which to leave.
+        <div style="float: right;">
+          <img src="openPitMine.jpg" alt="Open Pit Mine" style="width:302px;height:228px;">
+          <p> <a href="http://www.mine-engineer.com/mining/open_pit.htm"> Mine-engineer </a> defines an open pit mine as: "an excavation or cut made at the surface
+          of the ground for the purpose of extracting ore and which is open to the surface for the duration of the mine's life."
+          (<a href="http://www.mining-technology.com/contractors/project/marston/marston4.html"> Image Source </a>) </p>
+        </div>
+      </p>
+
       <p>
         The concentration of ore in each of the blocks has been determined through test drilling. This concentration and the market value of the ore
         allows us to determine the profit gained from extracting each block.
@@ -187,10 +191,13 @@ aside {
       <p>
         Given these restrictions, we will use Gurobi to compute the order in which to extract the blocks to maximize profit.
       </p>
-      <p> References http://www.tulane.edu/~sanelson/eens1110/minresources.htm http://www.mine-engineer.com/mining/open_pit.htm</p>
     </div>
+
+
     <div class="section" id="model">
       <h2><a href="#model" name="model">Mathematical Model</a></h2>
+      <p> Let us now formulate a <a href="http://liu.diva-portal.org/smash/get/diva2:442025/FULLTEXT01.pdf"> Mathematical Model </a>
+      for the problem. </p>
 
       <p> The ground has been separated into several blocks, each of which has a known concentration of the metal ore. With each of these
       blocks we associate a binary variable $x_i$ such that if $x_i = 1$ we extract the block, otherwise we don't. </p>
@@ -198,14 +205,110 @@ aside {
       <p>
       We denote by $v_i$ the value of block $i$ which is proportional to the concentration of the metal ore. </p>
 
+
       <p>The blocks are distributed on several levels (level 1 corresponds to the surface, level 2 to the level immediately below it etc...).
       The deeper the blocks lie, the more costly they are to remove.
       Therefore, we also associate a cost $c_i$ with each block, which corresponds to the cost of removing it from the earth.</p>
 
-      <p>However, there is a constraint on the order in which the blocks can be removed. Indeed, to remove a block from the ground we must
-      also remove the block on top of it. Furthermore, due to restrictions on the slope of the mine, the blocks above and to the left and right
-      must also be removed. We can impose these constraints by drawing a precedence graph $G$. We consider the blocks to be the nodes of the graph,
-      and we draw a directed edge, from every block $i$ to the block above it, above to the left and above to the right. We then have the
+      <div id="blockdemo">
+      </div>
+      <p> Fig. 1: Hover over the different blocks to see which blocks need to be removed. </p>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+      <script>
+        var width = 600,
+            height = 250,
+            size = width/6;
+
+        var svgdemo = d3.select("#blockdemo").append("svg")
+                    .attr("width", width)
+                    .attr("height", height);
+
+        var backgroundG = svgdemo.append("g");
+
+        var blocksG = svgdemo.append("g");
+
+        backgroundG.append("rect").attr("x", 0).attr("y", 0)
+                   .attr("height", height).attr("width", width)
+                   .attr("fill", "#eaf1ea");
+
+        var blockdata = [];
+
+        for (var i = 0; i < 6; i++) {
+          if (i < 4) {
+            blockdata.push([(i+1)*size, (height - 2*size)/2]);
+          } else {
+            blockdata.push([(i-2)*size, height/2]);
+          }
+        }
+
+        var blocks = blocksG.selectAll("rect")
+                            .data(blockdata)
+                            .enter()
+                            .append("rect")
+                            .attr("x", function(d) { return d[0]; })
+                            .attr("y", function(d) { return d[1]; })
+                            .attr("id", function(d,i) { return "blockdemo" + String(i); })
+                            .attr("width", size)
+                            .attr("height", size)
+                            .attr("stroke", "black")
+                            .attr("fill", "#cdc")
+                            .on("mouseover", blockhover)
+                            .on("mouseout", blockstop);
+
+        var texts = svgdemo.selectAll("text")
+                           .data(blockdata)
+                           .enter()
+                           .append("text")
+                           .text(function(d,i) { return String(i+1); })
+                           .attr("x", function(d) { return d[0] + size/2; })
+                           .attr("y", function(d) { return d[1] + size/2; })
+                           .attr("font-family", "sans-serif")
+                           .attr("font-size", "18px")
+                           .attr("fill", "white")
+                           .attr("font-weight", 800)
+                           .attr("text-anchor", "middle");
+
+
+        svgdemo.append("line")
+               .attr("x1", 0)
+               .attr("x2", width)
+               .attr("y1", (height - 2*size)/2)
+               .attr("y2", (height - 2*size)/2)
+               .attr("stroke", "black")
+               .attr("stroke-width", 2);
+
+        function blockhover() {
+          var id = d3.select(this).attr("id").slice(-1);
+          id = parseInt(id);
+          if (id < 4) {
+            d3.select(this).attr("fill", "#a3b0a3");
+          }
+          if (id === 4 ) {
+            d3.select("#blockdemo0").attr("fill", "#a3b0a3");
+            d3.select("#blockdemo1").attr("fill", "#a3b0a3");
+            d3.select("#blockdemo2").attr("fill", "#a3b0a3");
+            d3.select(this).attr("fill", "#a3b0a3");
+          }
+          if (id === 5) {
+            d3.select("#blockdemo1").attr("fill", "#a3b0a3");
+            d3.select("#blockdemo2").attr("fill", "#a3b0a3");
+            d3.select("#blockdemo3").attr("fill", "#a3b0a3");
+            d3.select(this).attr("fill", "#a3b0a3");
+          }
+        }
+
+        function blockstop() {
+          for (var i = 0; i < blockdata.length; i++ ) {
+            var id = "#blockdemo" + String(i);
+            d3.select(id).attr("fill", "#cdc");
+          }
+        }
+      </script>
+
+      <p>However, as seen in the <a href="#problem"> Problem Description </a> section, there is a constraint on the order in which the blocks
+      can be removed. We can impose these constraints by drawing a precedence graph $G$. We consider the blocks to be the nodes of the graph,
+      and we draw a directed edge, from every block $i$ to the block above it, above to the left and above to the right (see Fig. 1). We then have the
       following restriction for each edge $(i,j)$ of the precedence graph
        \[
         x_i \leq x_j \quad \forall (i,j) \, \in G
@@ -261,12 +364,13 @@ aside {
     </div>
     <div class="section" id="demo">
       <h2><a href="#demo" name="demo">Live Demo</a></h2>
-      <p> As an example we consider a mine where 28 blocks on 4 levels have been identified. Each block weighs a 1000 tonnes and
-      extraction costs 100USD/tonne for level 1, 200USD/tonne for level 2, 300USD/tonne for level 3 and 500USD/tonne for level 4.
-      Each color corresponds to a different concentration of ---some rock type---.
+      <p> As an example we consider a mine where 28 blocks on 4 levels have been identified.
+      Extraction costs 100,000 USD/block for level 1, 200,000 USD/block for level 2, 300,000 USD/block for level 3 and 500,000 USD/block for level 4.
+      The colors of the blocks correspond to different concentrations of ore (and hence different values of the blocks).
       </p>
-      <p> Click the Mine away! button to compute the optimal block removing order using Gurobi. Click on the blocks to change
-      the concentration of --some rock type---. You can click on the different circles to change the rock type. </p>
+      <p> You can change the ore concentration of each block by clicking them. You can click the buttons on the top to change
+      the type of concentration you want to add.
+      Click the Mine away! button to compute the optimal block removing order using Gurobi. To restart, click on any block. </p>
       <div id="demoarea">
       </div>
       <button class="pure-button" onclick="compute()">Mine away!</button>
