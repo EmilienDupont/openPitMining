@@ -157,61 +157,76 @@ rect:hover {
   </ul>
   <div id="container">
     <div class="section" id="intro">
-      <h1>Open Pit Mining</h1>
+      <h1>Open-Pit Mining</h1>
         <subtitle>with integer programming and Gurobi</subtitle>
     </div>
     <p>
-      In this example we'll solve a simple mining problem: how to extract rock or minerals from an open pit while incurring the smallest cost.
+      In this example we'll solve a simple mining problem: how to
+      extract minerals from an open pit in order to generate the
+      most profit.
     </p>
+
     <p>
-    We'll construct a mathematical model of the business problem, implement this model in Gurobi's Python interface, and compute and visualize an optimal solution.
+    We'll construct a mathematical model of the business problem,
+    implement this model in Gurobi's Python interface, and compute and
+    visualize an optimal solution.
     </p>
+
+    <p>
+      Although your own business may not involve operating a mine, the
+      same basic techniques used in this example can be used for other
+      applications like selecting what projects your business should
+      undertake.
+      </p>
+
     <div class="section" id="problem">
       <h2><a href="#problem" name="problem">Problem Description</a></h2>
-      <p>
-        <!-- Ref for gravity etc... is http://www.tulane.edu/~sanelson/eens1110/minresources.htm  -->
-        Measurements of gravity, magnetism and radioactivity have determined a location to be rich in a metal ore
-        and appropriate for open pit mining. The open pit mine has been divided into several blocks and we now need to decide which blocks
-        to extract and which to leave.
-        <div style="float: right;">
-          <img src="openPitMine.jpg" alt="Open Pit Mine" style="width:302px;height:228px;">
-          <p> <a href="http://www.mine-engineer.com/mining/open_pit.htm"> Mine-engineer </a> defines an open pit mine as: "an excavation or cut made at the surface
-          of the ground for the purpose of extracting ore and which is open to the surface for the duration of the mine's life."
-          (<a href="http://www.mining-technology.com/contractors/project/marston/marston4.html">Image Source</a>) </p>
-        </div>
+
+      <div style="float:right;">
+          <img src="openPitMine.jpg" alt="Open Pit Mine" style="width:200px;">
+      </div>
+
+      <p>An
+        <a href="http://www.mine-engineer.com/mining/open_pit.htm">open
+        pit mine</a> is a large cut made in the surface of the earth
+        for the purpose of extracting ore. Unlike other mines, an
+        <a href="https://en.wikipedia.org/wiki/Open-pit_mining">open
+        pit mine</a> does not require tunneling into the earth. The
+        mine remains open to the surface for its entire lifetime.
+      </p>
+
+      <p>Engineers use measurements of gravity, magnetisim, and
+        radioactivity to find a location for the mine that is rich in
+        metal ore. As part of this survey the subsurface of the
+        unexcavated mine is divided into multiple blocks, and the
+        concentraction of ore in each block is determined. Blocks
+        with larger concentrations of ore provide more revenue for the
+        mine.
+       </p>
+
+      <div style="clear:both"></div>
+
+      <aside>An image of an open-pit mine, showing the roads used by trucks to extract
+        ore from the bottom of the mine.
+      </aside>
+
+      <p>However, there is a cost associated with extracting each
+        block from the mine. Usually the deeper a block lies the more
+        expensive it is to remove. In addition, blocks cannot be
+        removed in arbitrary order. To remove a block, we must remove
+        the blocks directly above, and to the left, and right, of it.
       </p>
 
       <p>
-        The concentration of ore in each of the blocks has been determined through test drilling. This concentration and the market value of the ore
-        allows us to determine the profit gained from extracting each block.
+        The picture below shows a set of blocks below the surface of
+        the earth. Hover over each block, to see which blocks must be removed to access
+        it. Notice that to remove block 5, we must first remove blocks 1, 2, and 3.
       </p>
-      <p> However, there is also a cost related to extracting the block from the ground. Usually, the deeper the rock lies the more expensive it is
-      to remove. In addition we cannot remove the rocks in an arbitrary order: to remove any block we must also remove the block above it. We also need
-      trucks to enter the mine and remove the ore, so we have restrictions on the slope of the mine: to remove a block, the blocks above and to the left
-      and above and to the right must also be removed.</p>
-      <p>
-        Given these restrictions, we will use Gurobi to compute the order in which to extract the blocks to maximize profit.
-      </p>
-    </div>
-
-
-    <div class="section" id="model">
-      <h2><a href="#model" name="model">Mathematical Model</a></h2>
-      <p> Let us now formulate a <a href="http://liu.diva-portal.org/smash/get/diva2:442025/FULLTEXT01.pdf"> Mathematical Model </a>
-      for the problem. </p>
-
-      <p> The ground has been separated into several blocks, each of which has a known concentration of the metal ore. With each of these
-      blocks we associate a binary variable $x_i$ such that if $x_i = 1$ we extract the block, otherwise we don't. </p>
-
-      <p>
-      We denote by $v_i$ the value of block $i$ which is proportional to the concentration of the metal ore. </p>
-
-
-      <p>The blocks are distributed on several levels (level 1 corresponds to the surface, level 2 to the level immediately below it etc...).
-      The deeper the blocks lie, the more costly they are to remove.
-      Therefore, we also associate a cost $c_i$ with each block, which corresponds to the cost of removing it from the earth.</p>
 
       <figure id="blockdemo">
+        <aside>
+        An open pit mine with 6 blocks
+      </aside>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
       <script>
@@ -305,32 +320,84 @@ rect:hover {
         }
       </script>
 
-        <figcaption> Fig. 1: Hover over the different blocks to see which blocks need to be removed. </figcaption>
-      </figure>
+      <p>The business problem that a mine manager faces is to
+        determine the set of blocks to remove from the mine. The goal
+        is to extract the most profitable blocks from the mine, while
+        leaving unprofitable blocks.  However, the mine manager may be
+        forced to extract unprofitable blocks in order to reach those
+        that are rich in ore. Typically a plan, an order for the
+        excavation of blocks in the mine, is made before any digging
+        begins.
+        </p>
 
-      <p>However, as seen in the <a href="#problem"> Problem Description </a> section, there is a constraint on the order in which the blocks
-      can be removed. We can impose these constraints by drawing a precedence graph $G$. We consider the blocks to be the nodes of the graph,
-      and we draw a directed edge, from every block $i$ to the block above it, above to the left and above to the right (see Fig. 1). We then have the
-      following restriction for each edge $(i,j)$ of the precedence graph
-       \[
-        x_i \leq x_j \quad \forall (i,j) \, \in G
-      \]
-      Indeed, if $x_i = 1$ then we must have $x_j = 1$, i.e. if block $i$ is removed then so must the blocks above it. </p>
+    </div>
 
-      <p> Finally, we consider the profit. For each block, the profit is given by $v_i - c_i$ i.e. the value of the ore minus the
-      cost to remove the rock. This quantity is of course zero if the block is not removed. So the total profit is given by
-      \[
-        \text{profit} = \sum_{i} (v_i - c_i)x_i
-      \]</p>
 
-      <p> In summary, we wish to
+    <div class="section" id="model">
+      <h2><a href="#model" name="model">Mathematical Model</a></h2>
+
+      <p> The open-pit mining problem is an instance of a more general
+        problem known
+        as <a href="https://books.google.com/books?id=nMwFCAAAQBAJ&pg=PA1&source=gbs_toc_r&cad=4#v=onepage&q&f=false">project
+        selection</a>. In the project selection problem, a business
+        manager wants to select a group of projects to undertake. Some
+        projects are profitable, others are costly, and there are a
+        set of dependencies between projects. We'll describe the
+        mathematical model for this business problem in terms of
+        blocks in a mine. But it's important to remember that the
+        blocks can be viewed more generally as projects that a
+        business wishes to complete.
+        </p>
+
+      <p>We begin by defining a binary variable $x_i$ for each block
+        in the mine:
         \[
-      \begin{array}{ll}
-      \text{maximize} & \sum_{i} (v_i - c_i)x_i \\
-      \text{subject to} & x_i \leq x_j \quad \forall (i,j) \, \in G \\
-                        & x_i \in \{ 0, 1 \} \, \forall i
-      \end{array}
-      \]</p>
+        x_{i} = \begin{cases} 1 & \text{if block $i$ is extracted} \\
+                                        0 & \text{otherwise}.
+                          \end{cases}
+        \]
+      </p>
+
+      <p>In addition, there is a value $v_i$ associated with each block,
+        and a cost $c_i$ to extract the block. This allows us to compute
+        a profit $p_i = v_i - c_i$ for each block.
+      </p>
+
+      <p>To remove a block, we must first remove the blocks directly
+        above, and to the left, and right, of it. We can impose these
+        constraints by constructing a precedence graph $G(V,E)$.
+        The verices $V$ in the graph represent the blocks, and we
+        create an edge $(i, j)$ in the graph, if block $j$ must
+        be removed before block $i$.
+      </p>
+
+      <p>Our optimization model is then:
+        \[
+        \begin{align*}
+        \text{maximize}   & \quad {\displaystyle \sum_{i} p_i x_i} \\
+        \text{subject to} & \quad x_i \leq x_j \quad \forall (i,j) \, \in E \label{prec} \tag{1}\\
+                          & \quad x_i \in \{ 0, 1 \} \, \quad \forall i \in V \label{int}.
+        \end{align*}
+        \]
+      </p>
+
+      <p> The objective of the model is simple, maximize the profit of the
+        blocks that are selected to be removed.
+      </p>
+
+      <p>Constraint \ref{prec} enforces the precendent constraints on
+        the removal of blocks. If $x_i$ is 1, meaning block $i$ should
+        be removed, then we must also have that $x_j$ is 1. The set of
+        edges $E$ in the graph corresponds exactly to the pairs
+        $(i,j)$ where block $j$ must be removed before block $i$.
+        </p>
+
+      <p>
+      For more information on models for open pit mining see the
+      book: <i><a href="http://liu.diva-portal.org/smash/get/diva2:442025/FULLTEXT01.pdf">Mathematical
+      Optimization Models and Methods for Open-Pit Mining</a></i>.
+      </p>
+
 
     </div>
     <div class="section" id="implementation">
