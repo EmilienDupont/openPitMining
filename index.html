@@ -169,7 +169,8 @@ rect:hover {
     <div class="section" id="problem">
       <h2><a href="#problem" name="problem">Problem Description</a></h2>
       <p>
-        <a href="http://www.tulane.edu/~sanelson/eens1110/minresources.htm"> Measurements of gravity, magnetism and radioactivity</a> have determined a location to be rich in a metal ore
+        <!-- Ref for gravity etc... is http://www.tulane.edu/~sanelson/eens1110/minresources.htm  -->
+        Measurements of gravity, magnetism and radioactivity have determined a location to be rich in a metal ore
         and appropriate for open pit mining. The open pit mine has been divided into several blocks and we now need to decide which blocks
         to extract and which to leave.
         <div style="float: right;">
@@ -210,9 +211,7 @@ rect:hover {
       The deeper the blocks lie, the more costly they are to remove.
       Therefore, we also associate a cost $c_i$ with each block, which corresponds to the cost of removing it from the earth.</p>
 
-      <div id="blockdemo">
-      </div>
-      <p> Fig. 1: Hover over the different blocks to see which blocks need to be removed. </p>
+      <figure id="blockdemo">
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
       <script>
@@ -306,6 +305,9 @@ rect:hover {
         }
       </script>
 
+        <figcaption> Fig. 1: Hover over the different blocks to see which blocks need to be removed. </figcaption>
+      </figure>
+
       <p>However, as seen in the <a href="#problem"> Problem Description </a> section, there is a constraint on the order in which the blocks
       can be removed. We can impose these constraints by drawing a precedence graph $G$. We consider the blocks to be the nodes of the graph,
       and we draw a directed edge, from every block $i$ to the block above it, above to the left and above to the right (see Fig. 1). We then have the
@@ -337,7 +339,12 @@ rect:hover {
         Gurobi's Python interface:
       </p>
       <pre>
-      cost = []; value = []; edges = []; !!! FILL THESE OUT !!!
+      from gurobipy import *
+
+      # Example data for problem
+      cost = [100, 100, 100, 100, 200, 200];
+      value = [50, 150, 150, 150, 300, 50];
+      edges = [[4,0], [4,1], [4,2], [5,1], [5,2], [5,3]];
 
       m = Model()
 
