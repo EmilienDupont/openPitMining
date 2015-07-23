@@ -187,17 +187,17 @@ rect:hover {
       </div>
 
       <p>An
-        <a href="http://www.mine-engineer.com/mining/open_pit.htm">open
-        pit mine</a> is a large cut made in the surface of the earth
+        <a href="http://www.mine-engineer.com/mining/open_pit.htm">open-pit
+        mine</a> is a large cut made in the surface of the earth
         for the purpose of extracting ore. Unlike other mines, an
-        <a href="https://en.wikipedia.org/wiki/Open-pit_mining">open
-        pit mine</a> does not require tunneling into the earth. The
+        <a href="https://en.wikipedia.org/wiki/Open-pit_mining">open-pit
+        mine</a> does not require tunneling into the earth. The
         mine remains open to the surface for its entire lifetime.
       </p>
 
-      <p>Engineers use measurements of gravity, magnetisim, and
+      <p>Engineers use measurements of gravity, magnetism, and
         radioactivity to find a location for the mine that is rich in
-        metal ore. As part of this survey the subsurface of the
+        metal ore. As part of this survey, the subsurface of the
         unexcavated mine is divided into multiple blocks, and the
         concentraction of ore in each block is determined. Blocks
         with larger concentrations of ore provide more revenue for the
@@ -366,7 +366,7 @@ rect:hover {
       <p>To remove a block, we must first remove the blocks directly
         above, and to the left, and right, of it. We can impose these
         constraints by constructing a precedence graph $G(V,E)$.
-        The verices $V$ in the graph represent the blocks, and we
+        The vertices $V$ in the graph represent the blocks, and we
         create an edge $(i, j)$ in the graph, if block $j$ must
         be removed before block $i$.
       </p>
@@ -438,13 +438,15 @@ rect:hover {
     </div>
     <div class="section" id="demo">
       <h2><a href="#demo" name="demo">Live Demo</a></h2>
-      <p> As an example we consider a mine where 28 blocks on 4 levels have been identified.
-      Extraction costs 100,000 USD/block for level 1, 200,000 USD/block for level 2, 300,000 USD/block for level 3 and 500,000 USD/block for level 4.
-      The colors of the blocks correspond to different concentrations of ore (and hence different values of the blocks).
+      <p> As an example we consider a mine where 28 blocks on 4 levels
+      have been identified. The colors of the blocks correspond to different
+      concentrations of ore (and hence different values of the blocks) and
+      extraction costs increase with depth.
       </p>
-      <p> You can change the ore concentration of each block by clicking them. You can click the buttons on the top to change
-      the type of concentration you want to add.
-      Click the Mine away! button to compute the optimal block removing order using Gurobi. To restart, click on any block. </p>
+      <p> You can change the ore concentration of each block by clicking them.
+      You can click the buttons on the top to change the type of concentration
+      you want to add. Click the Mine away! button to compute the optimal block
+      removing order using Gurobi. To restart, click on any block. </p>
       <div id="demoarea">
       </div>
       <button class="pure-button" onclick="compute()">Mine away!</button>
