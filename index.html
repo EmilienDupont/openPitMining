@@ -719,7 +719,7 @@ function compute() {
   console.log('value',value)
   console.log('edges',edges)
 
-  d3.json('/openPitMining')
+  d3.json('openPitMining.py')
     .header('Content-Type', 'application/json')
     .post(JSON.stringify({'cost': cost,
                           'value': value,
