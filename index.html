@@ -51,8 +51,8 @@ rect:hover {
     <li><a href="#implementation">Implementation</a></li>
     <li><a href="#demo">Live Demo</a></li>
   </ul>
-  <div id="main_container">
-    <div class="section" id="intro">
+  <div id="example_container">
+    <div class="example_section" id="intro">
       <h1>Open-Pit Mining</h1>
         <subtitle>with integer programming and Gurobi</subtitle>
     </div>
@@ -75,7 +75,7 @@ rect:hover {
       undertake.
       </p>
 
-    <div class="section" id="problem">
+    <div class="example_section" id="problem">
       <h2><a href="#problem" name="problem">Problem Description</a></h2>
 
       <div style="float:right;">
@@ -229,7 +229,7 @@ rect:hover {
     </div>
 
 
-    <div class="section" id="model">
+    <div class="example_section" id="model">
       <h2><a href="#model" name="model">Mathematical Model</a></h2>
 
       <p> The open-pit mining problem is an instance of a more general
@@ -296,43 +296,42 @@ rect:hover {
 
 
     </div>
-    <div class="section" id="implementation">
+    <div class="example_section" id="implementation">
       <h2><a href="#implementation" name="implementation">Implementation</a></h2>
       <p>Below is the full implementation of the model (and the associated data) in
         Gurobi's Python interface:
       </p>
-      <pre>
-      from gurobipy import *
+      <examplecode>
+from gurobipy import *
 
-      # Example data for problem
-      cost = [100, 100, 100, 100, 200, 200];
-      value = [50, 150, 150, 150, 300, 50];
-      edges = [[4,0], [4,1], [4,2], [5,1], [5,2], [5,3]];
+# Example data for problem
+cost = [100, 100, 100, 100, 200, 200];
+value = [50, 150, 150, 150, 300, 50];
+edges = [[4,0], [4,1], [4,2], [5,1], [5,2], [5,3]];
 
-      m = Model()
+m = Model()
+n = len(cost) # number of blocks
 
-      n = len(cost) # number of blocks
+# Indicator variable for each block
+x = {}
+for i in range(n):
+   x[i] = m.addVar(vtype=GRB.BINARY, name="x%d" % i)
 
-      # Indicator variable for each block
-      xb = {}
-      for i in range(n):
-          xb[i] = m.addVar(vtype=GRB.BINARY, name="x%d" % i)
+m.update()
 
-      m.update()
+# Set objective
+m.setObjective(quicksum((value[i] - cost[i])*x[i] for i in range(n)), GRB.MAXIMIZE)
 
-      # Set objective
-      m.setObjective(quicksum((value[i] - cost[i])*xb[i] for i in range(n)), GRB.MAXIMIZE)
+# Add constraints
+for edge in edges:
+   u = edge[0]
+   v = edge[1]
+   m.addConstr(x[u] &lt;= x[v])
 
-      # Add constraints
-      for edge in edges:
-          u = edge[0]
-          v = edge[1]
-          m.addConstr(xb[u] <= xb[v])
-
-      m.optimize()
-      </pre>
+m.optimize()
+</examplecode>
     </div>
-    <div class="section" id="demo">
+    <div class="example_section" id="demo">
       <h2><a href="#demo" name="demo">Live Demo</a></h2>
       <p> As an example we consider a mine where 28 blocks on 4 levels
       have been identified. The colors of the blocks correspond to different
