@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+
+import sys
 from gurobipy import *
 
 # Model data
@@ -34,35 +36,51 @@ for i in range(14,18):
     edges.append([i,i-4])
 
 # Optimization
-def optimize(cost, value, edges):
+def optimize(cost, value, edges, output=False):
 
     m = Model()
-    
+
     n = len(cost) # number of blocks
-    
+
     # Indicator variable for each block
     xb = {}
     for i in range(n):
         xb[i] = m.addVar(vtype=GRB.BINARY, name="x%d" % i)
-    
+
     m.update()
-    
+
     # Set objective
     m.setObjective(quicksum((value[i] - cost[i])*xb[i] for i in range(n)), GRB.MAXIMIZE)
-    
+
     # Add constraints
     for edge in edges:
         u = edge[0]
         v = edge[1]
         m.addConstr(xb[u] <= xb[v])
-    
+
+    if not output:
+        m.params.OutputFlag = 0
+
     m.optimize()
-    
+
     solution = [];
-    
+
     for v in m.getVars():
         solution.append(v.x)
-    
+
     solution.append(m.objVal)
-    
+
     return solution
+
+def handleoptimize(jsdict):
+    if 'cost' in jsdict and 'value' in jsdict and 'edges' in jsdict:
+        solution = optimize(jsdict['cost'], jsdict['value'], jsdict['edges'])
+        return {'solution': solution }
+
+
+if __name__ == '__main__':
+    import json
+    jsdict = json.load(sys.stdin)
+    jsdict = handleoptimize(jsdict)
+    print 'Content-Type: application/json\n\n'
+    print json.dumps(jsdict)

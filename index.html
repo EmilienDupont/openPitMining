@@ -11,108 +11,8 @@
 
                      });
 </script>
-<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.4.2/pure-min.css">
+<link rel="stylesheet" href="http://examples.gurobi.com/base.css">
 <style>
-@import url(http://fonts.googleapis.com/css?family=PT+Serif|PT+Serif:b|PT+Serif:i|PT+Sans|PT+Sans:b);
-@import url(http://fonts.googleapis.com/css?family=Lato);
-html {
-   min-width: 1040px;
-}
-
-body {
-   background: #fcfcfa;
-   color: #333;
-   font-family: "PT Serif", serif;
-   /*margin: 0 1em 4em auto;*/
-   position: relative;
-   width: 960px;
-   left: 13em;
-}
-
-h1, h2, h3, h4 { font-family: "Lato", "PT Serif", serif; color: #000; text-rendering: optimizeLegibility; }
-
-h1 {
-  font-size: 64px;
-  line-height: 73px;
-  font-weight: 900;
-  margin-top: 0.67em;
-  margin-right: 0;
-  margin-bottom: 0;
-  margin-left: 0;
-}
-
-h2 {
-   margin-top: 2em;
-}
-
-subtitle {
-   display:block;
-   font-family: "PT Serif", serif;
-   font-size: 32px;
-   font-style: italic;
-   font-weight: 100;
-}
-
-p {
-  line-height: 150%;
-  width: 720px;
-}
-
-a {
-  color: steelblue;
-  cursor: auto;
-}
-
-a:not(:hover) {
-   text-decoration: none;
-}
-
-pre {
-   border-left: solid 2px #ccc;
-   padding-left: 18px;
-   margin: 2em 0 2em -20px;
-}
-
-aside {
-   font-size: small;
-   right: 0;
-   position: absolute;
-   width: 180px;
-}
-
-#nav {
-        left: 5px;
-        font-family: "Lato", serif;
-        font-weight: 700;
-        list-style: none;
-        margin: 0;
-        position: fixed;
-        top: 10px;
-        box-sizing: border-box;
-}
-
-
-#nav li {
-        margin-bottom: 0px;
-}
-
-#nav a {
-        color: #333;
-        display: block;
-        font-size: 14px;
-        border-left: 3px solid #fcfcfa;
-        padding: 5px 10px;
-        text-decoration: none;
-}
-
-#nav a:hover {
-   border-left: 3px solid steelblue;
-}
-
-#nav .current a {
-   border-left: 3px solid steelblue;
-}
-
 text {
   font-family: sans-serif
 }
@@ -150,8 +50,8 @@ rect:hover {
     <li><a href="#implementation">Implementation</a></li>
     <li><a href="#demo">Live Demo</a></li>
   </ul>
-  <div id="container">
-    <div class="section" id="intro">
+  <div id="example_container">
+    <div class="example_section" id="intro">
       <h1>Open-Pit Mining</h1>
         <subtitle>with integer programming and Gurobi</subtitle>
     </div>
@@ -174,7 +74,7 @@ rect:hover {
       undertake.
       </p>
 
-    <div class="section" id="problem">
+    <div class="example_section" id="problem">
       <h2><a href="#problem" name="problem">Problem Description</a></h2>
 
       <div style="float:right;">
@@ -218,8 +118,9 @@ rect:hover {
         it. Notice that to remove block 5, we must first remove blocks 1, 2, and 3.
       </p>
 
-      <figure id="blockdemo">
-        <aside>
+      <div id="blockdemo">
+      </div>
+      <aside>
         An open pit mine with 6 blocks
       </aside>
 
@@ -328,7 +229,7 @@ rect:hover {
     </div>
 
 
-    <div class="section" id="model">
+    <div class="example_section" id="model">
       <h2><a href="#model" name="model">Mathematical Model</a></h2>
 
       <p> The open-pit mining problem is an instance of a more general
@@ -395,43 +296,42 @@ rect:hover {
 
 
     </div>
-    <div class="section" id="implementation">
+    <div class="example_section" id="implementation">
       <h2><a href="#implementation" name="implementation">Implementation</a></h2>
       <p>Below is the full implementation of the model (and the associated data) in
         Gurobi's Python interface:
       </p>
-      <pre>
-      from gurobipy import *
+      <examplecode>
+from gurobipy import *
 
-      # Example data for problem
-      cost = [100, 100, 100, 100, 200, 200];
-      value = [50, 150, 150, 150, 300, 50];
-      edges = [[4,0], [4,1], [4,2], [5,1], [5,2], [5,3]];
+# Example data for problem
+cost = [100, 100, 100, 100, 200, 200];
+value = [50, 150, 150, 150, 300, 50];
+edges = [[4,0], [4,1], [4,2], [5,1], [5,2], [5,3]];
 
-      m = Model()
+m = Model()
+n = len(cost) # number of blocks
 
-      n = len(cost) # number of blocks
+# Indicator variable for each block
+x = {}
+for i in range(n):
+   x[i] = m.addVar(vtype=GRB.BINARY, name="x%d" % i)
 
-      # Indicator variable for each block
-      xb = {}
-      for i in range(n):
-          xb[i] = m.addVar(vtype=GRB.BINARY, name="x%d" % i)
+m.update()
 
-      m.update()
+# Set objective
+m.setObjective(quicksum((value[i] - cost[i])*x[i] for i in range(n)), GRB.MAXIMIZE)
 
-      # Set objective
-      m.setObjective(quicksum((value[i] - cost[i])*xb[i] for i in range(n)), GRB.MAXIMIZE)
+# Add constraints
+for edge in edges:
+   u = edge[0]
+   v = edge[1]
+   m.addConstr(x[u] &lt;= x[v])
 
-      # Add constraints
-      for edge in edges:
-          u = edge[0]
-          v = edge[1]
-          m.addConstr(xb[u] <= xb[v])
-
-      m.optimize()
-      </pre>
+m.optimize()
+</examplecode>
     </div>
-    <div class="section" id="demo">
+    <div class="example_section" id="demo">
       <h2><a href="#demo" name="demo">Live Demo</a></h2>
       <p> As an example we consider a mine where 28 blocks on 4 levels
       have been identified. The colors of the blocks correspond to different
@@ -719,7 +619,7 @@ function compute() {
   console.log('value',value)
   console.log('edges',edges)
 
-  d3.json('/openPitMining')
+  d3.json('openPitMining.py')
     .header('Content-Type', 'application/json')
     .post(JSON.stringify({'cost': cost,
                           'value': value,
