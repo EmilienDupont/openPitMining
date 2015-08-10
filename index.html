@@ -347,6 +347,27 @@ m.optimize()
       <button class="pure-button" onclick="compute()">Mine away!</button>
     </div>
 
+    <p>
+      <button class="pure-button" onclick="toggle_div()">Gurobi Log</button>
+    </p>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script>
+      function toggle_div() {
+        var logfile = d3.select('#logfile');
+        if (logfile.style("display") === "none") {
+          logfile.style("display", "block");
+        } else {
+          logfile.style("display", "none");
+        }
+
+      }
+    </script>
+
+    <examplecode id=logfile>
+    </examplecode>
+
     <div style="min-height:100px"></div>
 <!--[if gt IE 8]><!--><script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script><!--<![endif]-->
 <script src="http://davist11.github.io/jQuery-One-Page-Nav/jquery.nav.js"></script>
@@ -357,7 +378,11 @@ m.optimize()
   });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/1.2.7/spin.min.js"></script>
 <script>
+
+// Hide Log File intially
+d3.select('#logfile').style("display", "none");
 
 
 // Create data for each layer of blocks
@@ -632,7 +657,13 @@ function serverResponse(error, data) {
    if (!error) {
       if ('solution' in data) {
           // Import solution and put it into correct format
-          var solution = data['solution'];
+          var temporarySol = data['solution'];
+          var solution = temporarySol[0];
+
+          var logMsg = temporarySol[1]; // Log message to display
+
+          d3.select('#logfile').html(logMsg);
+
           var solTemp = [];
           profit = solution[solution.length - 1]; // Last element is profit
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import StringIO
 from gurobipy import *
 
 # Model data
@@ -35,6 +36,10 @@ for i in range(14,18):
     edges.append([i,i-5])
     edges.append([i,i-4])
 
+def mycallback(model, where):
+    if where == GRB.callback.MESSAGE:
+        print >>model.__output, model.cbGet(GRB.callback.MSG_STRING),
+
 # Optimization
 def optimize(cost, value, edges, output=False):
 
@@ -61,7 +66,10 @@ def optimize(cost, value, edges, output=False):
     if not output:
         m.params.OutputFlag = 0
 
-    m.optimize()
+    output = StringIO.StringIO()
+    m.__output = output
+
+    m.optimize(mycallback)
 
     solution = [];
 
@@ -70,7 +78,7 @@ def optimize(cost, value, edges, output=False):
 
     solution.append(m.objVal)
 
-    return solution
+    return [solution, output.getvalue()]
 
 def handleoptimize(jsdict):
     if 'cost' in jsdict and 'value' in jsdict and 'edges' in jsdict:
