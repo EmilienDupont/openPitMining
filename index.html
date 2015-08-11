@@ -462,6 +462,8 @@ var backgroundG = svg.append("g")
 
 var buttonsG = svg.append("g");
 
+var buttonsSelectG = svg.append("g");
+
 var buttons = buttonsG.selectAll("circle")
                  .data(types)
                  .enter()
@@ -476,6 +478,8 @@ var buttons = buttonsG.selectAll("circle")
            .attr("class", function(d) { return d;} )
            .attr("stroke", "black")
            .attr("stroke-width", 2);
+
+redraw(type);
 
 var labelsG = svg.append("g");
 
@@ -609,6 +613,7 @@ function mousedown() {
 function buttonpress() {
   type = d3.select(this).attr("class")
   console.log(type)
+  redraw(type);
 }
 
 function removeSol() {
@@ -616,10 +621,24 @@ function removeSol() {
            .remove();
 }
 
+function redraw(type) {
+  buttonsSelectG.selectAll("circle").remove("circle");
+
+  var idx = types.indexOf(type);
+
+  console.log('idx', idx);
+
+  buttonsSelectG.append("circle")
+                .attr("cx", (idx+.5)*size/1.2)
+                .attr("cy", 20)
+                .attr("r", 15)
+                .attr("fill", "none")
+                .attr("stroke", "black")
+                .attr("stroke-width", 4);
+}
+
 // Compute
 function compute() {
-  //cost = [100, 100, 100, 100, 100, 100, 100, 100, 1000, 200, 200, 200, 200, 1000, 1000, 1000, 300, 1000];
-  //value = [200, 0, 0, 0, 0, 0, 300, 0, 0, 500, 0, 200, 0, 0, 0, 0, 1000, 1200];
   blocksG.selectAll("rect").attr("class", function(d) {
                                       var tempType = d3.select(this).attr("class");
                                       if (tempType === "typea") {
