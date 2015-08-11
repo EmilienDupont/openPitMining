@@ -658,6 +658,10 @@ function serverResponse(error, data) {
       if ('solution' in data) {
           // Import solution and put it into correct format
           var temporarySol = data['solution'];
+          if (temporarySol[0] === "error") {
+            alert("10 second solve time limit exceeded.");
+            return;
+          }
           var solution = temporarySol[0];
 
           var logMsg = temporarySol[1]; // Log message to display

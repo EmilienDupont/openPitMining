@@ -66,10 +66,15 @@ def optimize(cost, value, edges, output=False):
     if not output:
         m.params.OutputFlag = 0
 
+    m.setParam('TimeLimit', 10)
+
     output = StringIO.StringIO()
     m.__output = output
 
     m.optimize(mycallback)
+
+    if (m.status != 2):
+        return ["error"]
 
     solution = [];
 
