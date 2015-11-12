@@ -458,9 +458,9 @@ for (var i = layer2; i < layer3; i++) { // range(10,18)
 }
 
 for (var i = layer3; i < layer4; i++) { // range(18,24)
-    edges.push([i,i-(layer3-layer2)])
-    edges.push([i,i-(layer3-layer2)+1])
-    edges.push([i,i-(layer3-layer2)+2])
+    edges.push([i,i-(layer3-layer2)]);
+    edges.push([i,i-(layer3-layer2)+1]);
+    edges.push([i,i-(layer3-layer2)+2]);
 }
 
 for (var i = layer4; i < numBlocks; i++) { // range(24,28)
@@ -703,9 +703,9 @@ function compute() {
                                       return d3.select(this).attr("class");
                                     });
 
-  console.log('cost',cost)
-  console.log('value',value)
-  console.log('edges',edges)
+  console.log('cost',cost);
+  console.log('value',value);
+  console.log('edges',edges);
 
   d3.json('openPitMining.py')
     .header('Content-Type', 'application/json')
@@ -741,7 +741,7 @@ function serverResponse(error, data) {
           console.log('test',solution)
 
           for (var i = 0; i < solution.length; i++) {
-            if (solution[i] === 1) {
+            if (solution[i] >= 0.5) {
               solTemp.push(i);
             }
           }
