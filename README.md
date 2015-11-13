@@ -1,4 +1,5 @@
-# Facility Location
+# Open-Pit Mining
+
 An example of using Gurobi to solve an open-pit mining problem.
 
 ![](screenshot.png?raw=true)
